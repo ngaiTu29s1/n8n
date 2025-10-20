@@ -1,0 +1,29 @@
+version: "3.8"
+
+services:
+  n8n:
+    image: n8nio/n8n:latest
+    restart: unless-stopped
+    ports:
+      - "5678:5678"
+    env_file:
+      - ./.env
+    environment:
+      WEBHOOK_URL: ${WEBHOOK_URL}
+      N8N_EDITOR_BASE_URL: ${N8N_EDITOR_BASE_URL}
+      N8N_HOST: ${N8N_HOST}
+      N8N_PROTOCOL: ${N8N_PROTOCOL}
+      N8N_PORT: ${N8N_PORT}
+      N8N_PROXY_HOPS: ${N8N_PROXY_HOPS}
+
+      N8N_BASIC_AUTH_ACTIVE: ${N8N_BASIC_AUTH_ACTIVE}
+      N8N_BASIC_AUTH_USER: ${N8N_BASIC_AUTH_USER}
+      N8N_BASIC_AUTH_PASSWORD: ${N8N_BASIC_AUTH_PASSWORD}
+
+      N8N_SECURE_COOKIE: ${N8N_SECURE_COOKIE}
+
+      TZ: ${TZ}
+    volumes:
+      - ./data:/home/node/.n8n
+    # Đảm bảo file trong volume do user thường sở hữu (tránh sinh file root)
+    user: "1000:1000"
