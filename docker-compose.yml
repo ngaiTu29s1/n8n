@@ -27,3 +27,9 @@ services:
       - ./data:/home/node/.n8n
     # Đảm bảo file trong volume do user thường sở hữu (tránh sinh file root)
     user: "1000:1000"
+    networks:
+    - homelab
+
+networks:
+  homelab:
+    external: true
