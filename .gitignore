@@ -1,2 +1,5 @@
 .env
 data/
+
+v2/data/
+v2/.env
