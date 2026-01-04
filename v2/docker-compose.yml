@@ -23,6 +23,10 @@ services:
       - TZ=${TZ}
       # Proxy Hops: Bắt buộc vì chạy sau Cloudflare Tunnel
       - N8N_PROXY_HOPS=1 
+
+    extra_hosts:
+      - "api.telegram.org:149.154.167.220"
+      - "core.telegram.org:149.154.167.99"
       
     volumes:
       # Mount Data: Lưu vào folder 'data' ngay tại đây
