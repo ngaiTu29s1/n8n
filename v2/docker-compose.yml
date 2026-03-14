@@ -1,40 +1,50 @@
 services:
+
   n8n-beta:
-    image: n8nio/n8n:next  # Dùng tag 'next' cho bản beta mới nhất
+    image: n8nio/n8n:next
     container_name: n8n_v2_beta
     restart: unless-stopped
-    
-    # Map cổng khác để tránh đụng hàng với V1 (5678)
     ports:
       - "5679:5678"
-    
-    # Load file .env nằm cùng thư mục này
+
     env_file:
       - .env
-      
+
     environment:
       - N8N_HOST=${DOMAIN_NAME}
       - N8N_PORT=${N8N_PORT}
       - N8N_PROTOCOL=${N8N_PROTOCOL}
       - WEBHOOK_URL=${WEBHOOK_URL}
       - N8N_EDITOR_BASE_URL=${N8N_EDITOR_BASE_URL}
-      - NODE_ENV=${NODE_ENV}
-      - GENERIC_TIMEZONE=${GENERIC_TIMEZONE}
-      - TZ=${TZ}
-      # Proxy Hops: Bắt buộc vì chạy sau Cloudflare Tunnel
-      - N8N_PROXY_HOPS=1 
+      - N8N_PROXY_HOPS=1
 
-    extra_hosts:
-      - "api.telegram.org:149.154.167.220"
-      - "core.telegram.org:149.154.167.99"
-      
+      - N8N_ENCRYPTION_KEY=${N8N_ENCRYPTION_KEY}
+
+      # enable runners
+      - N8N_RUNNERS_ENABLED=true
+      - N8N_RUNNERS_MODE=external
+      - N8N_RUNNERS_AUTH_TOKEN=${N8N_RUNNERS_AUTH_TOKEN}
+      - N8N_RUNNERS_BROKER_LISTEN_ADDRESS=0.0.0.0
+
+      # enable python
+      - N8N_NATIVE_PYTHON_RUNNER=true
+
     volumes:
-      # Mount Data: Lưu vào folder 'data' ngay tại đây
       - ./data:/home/node/.n8n
-      
-    # Chạy dưới quyền user 1000 (User hiện tại của Hoàng thượng)
-    user: "1000:1000"
-    
+
+    networks:
+      - homelab
+
+
+  n8n-runners:
+    image: n8nio/runners:next
+    container_name: n8n_runners
+    restart: unless-stopped
+
+    environment:
+      - N8N_RUNNERS_AUTH_TOKEN=${N8N_RUNNERS_AUTH_TOKEN}
+      - N8N_RUNNERS_TASK_BROKER_URI=http://n8n-beta:5679
+
     networks:
       - homelab
 
