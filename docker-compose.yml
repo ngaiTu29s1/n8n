@@ -1,35 +1,55 @@
-version: "3.8"
-
 services:
+
   n8n:
+    image: n8nio/n8n:2.20.9
     container_name: n8n
-    image: n8nio/n8n:1.121.3
     restart: unless-stopped
     ports:
       - "5678:5678"
+
     env_file:
-      - ./.env
+      - .env
+
     environment:
-      WEBHOOK_URL: ${WEBHOOK_URL}
-      N8N_EDITOR_BASE_URL: ${N8N_EDITOR_BASE_URL}
-      N8N_HOST: ${N8N_HOST}
-      N8N_PROTOCOL: ${N8N_PROTOCOL}
-      N8N_PORT: ${N8N_PORT}
-      N8N_PROXY_HOPS: ${N8N_PROXY_HOPS}
+      - N8N_HOST=${DOMAIN_NAME}
+      - N8N_PORT=${N8N_PORT}
+      - N8N_PROTOCOL=${N8N_PROTOCOL}
+      - WEBHOOK_URL=${WEBHOOK_URL}
+      - N8N_EDITOR_BASE_URL=${N8N_EDITOR_BASE_URL}
+      - N8N_PROXY_HOPS=1
 
-      N8N_BASIC_AUTH_ACTIVE: ${N8N_BASIC_AUTH_ACTIVE}
-      N8N_BASIC_AUTH_USER: ${N8N_BASIC_AUTH_USER}
-      N8N_BASIC_AUTH_PASSWORD: ${N8N_BASIC_AUTH_PASSWORD}
+      - N8N_ENCRYPTION_KEY=${N8N_ENCRYPTION_KEY}
 
-      N8N_SECURE_COOKIE: ${N8N_SECURE_COOKIE}
+      # enable runners
+      - N8N_RUNNERS_MODE=external
+      - N8N_RUNNERS_AUTH_TOKEN=${N8N_RUNNERS_AUTH_TOKEN}
+      - N8N_RUNNERS_BROKER_LISTEN_ADDRESS=0.0.0.0
 
-      TZ: ${TZ}
+
+      # enable python
+      - N8N_NATIVE_PYTHON_RUNNER=true
+
+      #Oauth
+      - N8N_SKIP_AUTH_ON_OAUTH_CALLBACK=false
+
     volumes:
       - ./data:/home/node/.n8n
-    # Đảm bảo file trong volume do user thường sở hữu (tránh sinh file root)
-    user: "1000:1000"
+
     networks:
-    - homelab
+      - homelab
+
+
+  n8n-runners:
+    image: n8nio/runners:next
+    container_name: n8n_runners
+    restart: unless-stopped
+
+    environment:
+      - N8N_RUNNERS_AUTH_TOKEN=${N8N_RUNNERS_AUTH_TOKEN}
+      - N8N_RUNNERS_TASK_BROKER_URI=http://n8n:5679
+
+    networks:
+      - homelab
 
 networks:
   homelab:
